@@ -1,0 +1,10 @@
+{% block subject %}Добро пожаловать в Мир умных ОСИ{% endblock %}
+{% block plain %}
+
+  Вы зарегестировались на нашем сайте используя данные:
+      email: {{email}}
+      username: {{username}}
+      name: {{name}}
+
+  Вместе мы делаем мир лучше!
+{% endblock %}
