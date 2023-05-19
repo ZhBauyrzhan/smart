@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext as _
 from . import managers
+from address.models import Address
 
 
 class CustomUser(AbstractUser):
@@ -13,6 +14,8 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=30, verbose_name=_('First name'))
     last_name = models.CharField(max_length=30, verbose_name=_('Last name'))
     username = models.CharField(unique=False, max_length=25, verbose_name=_('Username'))
+
+    address = models.ManyToManyField(to=Address, related_name='user_addresses')
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
