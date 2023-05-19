@@ -15,8 +15,6 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(max_length=30, verbose_name=_('Last name'))
     username = models.CharField(unique=False, max_length=25, verbose_name=_('Username'))
 
-    address = models.ManyToManyField(to=Address, related_name='user_addresses')
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']
 

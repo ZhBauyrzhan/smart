@@ -3,10 +3,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from sensors.views import new_measure
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
+    path('new-measure/', new_measure, name='new_measure'),
     path('api/', include('src.api_urls')),
     # path('__debug__/', include('debug_toolbar.urls')),
 ]

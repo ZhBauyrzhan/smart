@@ -3,6 +3,8 @@ import uuid
 from typing import Protocol, OrderedDict
 
 from django.core.cache import cache
+from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt import tokens
 from templated_email import send_templated_mail
 
 from src import settings
@@ -25,12 +27,47 @@ class UserServicesV1:
 
     def create_user(self, data: OrderedDict) -> dict:
         session_id = self._verify_email(data=data)
+        return {
+            'session_id': session_id,
+        }
 
-    def verify_user(self, data: OrderedDict) -> CustomUser | None: ...
+    def verify_user(self, data: OrderedDict):
+        user_data = cache.get(data['session_id'])
 
-    def create_token(self, data: OrderedDict) -> dict: ...
+        if not user_data:
+            raise ValidationError
 
-    def verify_token(self, data: OrderedDict) -> dict: ...
+        if data['code'] != user_data['code']:
+            raise ValidationError
+
+        user = self.user_repos.create_user(data={
+            'email': user_data['email']
+        })
+        self._send_letter_to_email(user=user)
+
+    def create_token(self, data: OrderedDict) -> dict:
+        session_id = self._verify_phone_number(data=data, is_exist=True)
+
+        return {
+            'session_id': session_id,
+        }
+
+    def verify_token(self, data: OrderedDict) -> dict:
+        session = cache.get(data['session_id'])
+        if not session:
+            raise ValidationError
+
+        if session['code'] != data['code']:
+            raise ValidationError
+
+        user = self.user_repos.get_user(data={'phone_number': session['phone_number']})
+        access = tokens.AccessToken.for_user(user=user)
+        refresh = tokens.RefreshToken.for_user(user=user)
+
+        return {
+            'access': str(access),
+            'refresh': str(refresh),
+        }
 
     def _verify_email(self, data: OrderedDict, is_exists: bool = False) -> str:
         email = data['email']
@@ -55,6 +92,8 @@ class UserServicesV1:
             recipient_list=[user.email],
             context={
                 'email': user.email,
+                'name': f'{user.first_name} {user.last_name}',
+                'username': user.username
             },
         )
 
