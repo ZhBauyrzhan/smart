@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from address.models import Address
@@ -29,10 +31,12 @@ class Sensor(models.Model):
 
 
 class Measurement(models.Model):
-    value = models.CharField(max_length=100, verbose_name=_('Value'))
-    unit = models.CharField(max_length=100, verbose_name=_('Measurement Unit'), choices=MeasurementUnitChoices.choices)
     sensor = models.ForeignKey(to=Sensor, verbose_name=_('Sensor to connect'), on_delete=models.CASCADE,
                                related_name='sensors')
-    physical_quantity = models.CharField(max_length=60, verbose_name=_('Physical quantity'),
-                                         choices=PhysicalQuantityChoices.choices)
+    data=models.JSONField(null=True, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
+
+    # value = models.CharField(max_length=100, verbose_name=_('Value'))
+    # unit = models.CharField(max_length=100, verbose_name=_('Measurement Unit'), choices=MeasurementUnitChoices.choices)
+    # physical_quantity = models.CharField(max_length=60, verbose_name=_('Physical quantity'),
+    #                                      choices=PhysicalQuantityChoices.choices)
